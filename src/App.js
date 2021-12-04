@@ -45,28 +45,21 @@ const handleChoice = (card) => {
   
 }
 
+// Comparar as duas cartas e exibir no console:
+
 useEffect(() => {
 
   if(choiceOne){
     if(choiceTwo){
-    const {src: src1} = choiceOne;
-    console.log(src1)
-    const {src: src2} = choiceTwo;
-    console.log(src2)
-    if(src1 === src2){
+    if(choiceOne.src === choiceTwo.src){
        console.log(`the cards are equal`)
       return resetTurn();
     } else {
       console.log(`The cards are different!`)
       return  resetTurn();
     }
-
-   
   }}
 }, [choiceOne, choiceTwo])
-
-// Comparar as duas cartas e exibir no console:
-
 
 // Resetar as escolhas feitas e incrementar um turno:
 

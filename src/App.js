@@ -6,12 +6,12 @@ import { SingleCard } from './components/SingleCard';
 // Esta const vai ser criada aqui pois não muda ao longo do jogo: as cartas são sempre as mesmas!
 
 const cardImages =[
-  {"src" : "/img/helmet-1.png"},
-  {"src" : "/img/potion-1.png"},
-  {"src" : "/img/ring-1.png"},
-  {"src" : "/img/scroll-1.png"},
-  {"src" : "/img/shield-1.png"},
-  {"src" : "/img/sword-1.png"}
+  {"src" : "/img/helmet-1.png", matched: false},
+  {"src" : "/img/potion-1.png", matched: false},
+  {"src" : "/img/ring-1.png", matched: false},
+  {"src" : "/img/scroll-1.png", matched: false},
+  {"src" : "/img/shield-1.png", matched: false},
+  {"src" : "/img/sword-1.png", matched: false}
 ]
 
 
@@ -21,6 +21,7 @@ function App() {
   const [turns, setTurns] = useState(0);
   const [choiceOne, setChoiceOne] = useState(null);
   const [choiceTwo, setChoiceTwo] = useState(null);
+  const [disabled, setDisabled] = useState(false);
 
 // Função para misturar as cartas:
 // 1º: duplicar as cartas que estão no array cardImages;
@@ -31,6 +32,8 @@ const shuffleCards = () => {
 
   const shuffleCards = [...cardImages, ...cardImages].sort(() => Math.random() - 0.5).map((card) => ({...card, id: Math.random()}) )
 
+  setChoiceOne(null);
+  setChoiceTwo(null);
   setCards(shuffleCards);
   setTurns(0);
 }
@@ -49,17 +52,26 @@ const handleChoice = (card) => {
 
 useEffect(() => {
 
-  if(choiceOne){
-    if(choiceTwo){
+  if(choiceOne && choiceTwo){
+    setDisabled(true);
     if(choiceOne.src === choiceTwo.src){
-       console.log(`the cards are equal`)
+      setCards(prevCards => {
+        return prevCards.map(card => {
+          if(card.src === choiceOne.src){
+            return {...card, matched: true}
+          } else {
+            return card
+          }
+        })
+      })
       return resetTurn();
     } else {
-      console.log(`The cards are different!`)
-      return  resetTurn();
+      setTimeout(() => resetTurn(), 1000);
     }
-  }}
+  }
 }, [choiceOne, choiceTwo])
+
+console.log(cards);
 
 // Resetar as escolhas feitas e incrementar um turno:
 
@@ -67,8 +79,14 @@ const resetTurn = () => {
   setChoiceOne(null);
   setChoiceTwo(null);
   setTurns(prevTurns => prevTurns + 1);
+  setDisabled(false)
 }
 
+// Para começar um jogo com os dados resetados, é necessário utilizar o useEffect, pois, para que na primeira vez que o jogo renderizar seja passado os valores originais para os estados (ChoiceOne, ChoiceTwo):
+
+useEffect(() => {
+   shuffleCards()     
+}, [])
 
   return (
     <div className="App">
@@ -76,11 +94,15 @@ const resetTurn = () => {
       <button onClick={shuffleCards}>New Game</button>
 
     <div className="card-grid">
-      {cards.map(card => (<SingleCard card={card} 
+      {cards.map(card => (<SingleCard 
+      card={card} 
       handleChoice={handleChoice}
-      key={card.id}/>))}
+      key={card.id}
+      flipped={card === choiceOne || card === choiceTwo || card.matched}
+      disabled={disabled}
+      />))}
     </div>
-  
+  <div>Turns: {turns}</div>
   </div>
   );
 }
